@@ -1,0 +1,36 @@
+{
+  "name": "fluvi",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/grunt ci"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gorm/fluvi"
+  },
+  "keywords": [],
+  "author": "gorm <proev@users.noreply.github.com>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/gorm/fluvi/issues"
+  },
+  "dependencies": {
+    "xml2js": "^0.4.1",
+    "sync": "^0.2.2",
+    "optimist": "^0.6.1"
+  },
+  "devDependencies": {
+    "chai": "~1.8.1",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-watch": "~0.6.0",
+    "grunt": "~0.4.1",
+    "grunt-mocha-cli": "~1.1.0",
+    "grunt-complexity": "~0.1.3",
+    "grunt-cli": "~0.1.9",
+    "ncp": "^0.5.0",
+    "rimraf": "^2.2.6"
+  },
+  "bin": "./bin/fluviconv.js"
+}

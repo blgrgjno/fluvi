@@ -1,10 +1,12 @@
+'use_strict';
 
 var FS = require('fs');
-var path = require('path');
-var xml2js = require('xml2js');
 var Sync = require('sync');
 var assert = require('assert');
+var path = require('path');
 var url = require('url');
+var util = require('util');
+var xml2js = require('xml2js');
 
 /**
  * Returns directories in a directory.
@@ -187,7 +189,6 @@ exports.meta = function(directory) {
   var ret = [];
   dirs.forEach(function(d) {
     var meta = getMetaDataFromDirectory(d);
-
     // copy the interesting part to an object with key set to itemID
     ret[ret.length] = getObjectFromMeta(meta, getVideoFromDirectory(d));
   });
@@ -209,7 +210,7 @@ exports.index = function (directory) {
   dirs.forEach(function(d) {
     var meta = getMetaDataFromDirectory(d);
     var slides = meta.videoTimelineInfo;
-    // set slides to 0 if not set. numSlides below would then be 0
+
     if ("\n\t" == slides) {
       slides = null;
     }
@@ -229,8 +230,8 @@ exports.index = function (directory) {
 exports.convert = function (directory, cut) {
   var metadata = getMetaDataFromDirectory(directory);
 
-  // it's either already converted or the wrong directory was provided
   if (! metadata) {
+    util.debug('already converted, or wrong directory was provided');
     return false;
   }
 
@@ -247,11 +248,12 @@ exports.convert = function (directory, cut) {
   var metaObject = getObjectFromMeta(metadata,
                                      getVideoFromDirectory(directory));
 
+  // adjust slide starttime according to video_in (cut file)
   if (cut) {
     metaObject = cutVideo(metaObject);
   }
 
-  // ...and write it to file
+  // and write it to file
   var ret = FS.writeFileSync(directory + '/meta.json',
                              JSON.stringify(metaObject, null, " "));
   if (ret) {

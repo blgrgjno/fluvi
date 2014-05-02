@@ -12,7 +12,7 @@ function convertmeta {
 }
 
 while read f;
-do 
+do
   echo '*' cd video/$f/timeline
   cd video/$f/timeline
   for s in *.swf;

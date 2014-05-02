@@ -4,7 +4,8 @@
 
 Requires an export from fluvi that contains all the files in a
 well-known file/directory structure. Will perform a convert of all
-file meta data from XML to JSON.
+file meta data from XML to JSON, and rename all found video
+directories in a given directory.
 
 ## Install
 
@@ -16,7 +17,7 @@ $ cd fluvi
 $ npm install --global
 ```
 
-This will make a command line tool available.
+This will make the command ```fluvi``` available from the command line.
 
 ## Usage
 
@@ -52,4 +53,10 @@ swfrender installed (from the SWFTools package).
 This feature should be part of the convertion script, but for now you
 are required to do this manually.
 
+## Testing
 
+Can be tested with the following command:
+
+```bash
+$ npm test
+```

@@ -16,37 +16,37 @@ if (argv.v) {
   process.exit();
 }
 
-if (argv.h || argv._.length != 1) {
+if (argv.h || argv._.length !== 1) {
   console.log([
-    "usage: fluviconv [options] DIRECTORY",
-    "",
-    "DIRECTORY is the directory containing the fluvi directory",
-    "options:",
-    "  -n                Dry run)",
-    "  -c                File is cutted (adjust slide startimes"
-      + " according to videoIn)", // will adjust slides starttime
-    "  -v                Print version.",
-    "  -h                Write this help."
+    'usage: ' + process.title + ' [options] DIRECTORY',
+    '',
+    'DIRECTORY is the directory containing the fluvi directory',
+    'options:',
+    '  -n                Dry run)',
+    '  -c                File is cutted (adjust slide startimes' +
+      ' according to videoIn)', // will adjust slides starttime
+    '  -v                Print version.',
+    '  -h                Write this help.'
   ].join('\n'));
 
-  if (argv._.length != 1) {
-    console.log("DIRECTORY must be provided");
+  if (argv._.length !== 1) {
+    console.log('DIRECTORY must be provided');
   }
 
   process.exit();
 }
 
 if (argv.n) {
-  console.log("Not performing changes. Dry run!");
+  console.log('Not performing changes. Dry run!');
 }
 
-if (argv._.length == 1) {
+if (argv._.length === 1) {
   if (argv.n) {
-    console.log("Would convert " + argv._[0]);
+    console.log('Would convert ' + argv._[0]);
   } else {
     var ret = fluvi.convert(argv._[0], argv.c);
     if (! ret) {
-      console.log("Unable to convert " + argv._[0]);
+      console.log('Unable to convert ' + argv._[0]);
       process.exit();
     }
   }

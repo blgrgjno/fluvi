@@ -14,10 +14,10 @@ Requires a working node installation.
 ```bash
 $ git clone https://github.com/blgrgjno/fluvi.git
 $ cd fluvi
-$ npm install --global
+$ sudo npm install --global
 ```
 
-This will make the command ```fluvi``` available from the command line.
+This will make the command ```fluviconf``` available from the command line.
 
 ## Usage
 

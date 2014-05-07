@@ -1,5 +1,4 @@
-'use_strict';
-
+'use strict';
 var FS = require('fs');
 var Sync = require('sync');
 var assert = require('assert');
@@ -15,13 +14,13 @@ var xml2js = require('xml2js');
  * name from input
  */
 function getDirsFromDirSync (directory) {
-  var dirs = FS.readdirSync(directory, "utf-8");
+  var dirs = FS.readdirSync(directory, 'utf-8');
   var retObj = [];
   dirs.forEach(function(f) {
     var file = path.join(directory, f);
     // ensure that it starts with directory
     if (0 !== file.indexOf(directory)) {
-      throw "directory ended up somewhere unexpected after normalization";
+      throw 'directory ended up somewhere unexpected after normalization';
     }
 
     if (FS.statSync(file).isDirectory()) {
@@ -30,7 +29,7 @@ function getDirsFromDirSync (directory) {
   });
 
   return retObj;
-};
+}
 
 /**
  * Adjust the metadata after the file has been cutted from videoIn
@@ -39,8 +38,6 @@ function getDirsFromDirSync (directory) {
  * @returns A new object with slides and videoIn adjusted
  */
 function cutVideo(metaObj) {
-  var i;
-
   if (! metaObj) {
     throw new TypeError('No `metaObj` argument provided to cutVideo');
   }
@@ -71,7 +68,7 @@ function getObjectFromMeta(meta, videoFile) {
   var slides = meta.videoTimelineInfo;
 
   // set slides to 0 if not set. numSslides below would then be 0
-  if ("\n\t" == slides) {
+  if (Array.isArray(slides) && '\n\t' === slides[0]) {
     slides = null;
   }
 
@@ -92,11 +89,12 @@ function getObjectFromMeta(meta, videoFile) {
   };
 
   // add slides
-  if (slides != null) {
+  if (slides !== null) {
     var numSlides = 0;
     // got slides, adding them to retObj one by one because they need
     // some regexp love
-    retObj["slides"] = [];
+    retObj['slides'] = [];
+
     slides[0].slide.forEach(function(slide) {
       if (slide.slideURL) {
         // ensure we only have 1 slideURL for each slide
@@ -104,14 +102,14 @@ function getObjectFromMeta(meta, videoFile) {
 
         // we need to rewrite slideURL
         if (slide.slideURL[0] &&
-            typeof(slide.slideURL[0]) == "string" &&
-            slide.slideURL[0] != "") {
+            typeof(slide.slideURL[0]) === 'string' &&
+            slide.slideURL[0] !== '') {
           var pathname = url.parse(slide.slideURL[0]).pathname;
           var tmpPath = path.basename(pathname);
           slide.slideURL[0] = tmpPath;
         }
       }
-      retObj["slides"][numSlides++] = slide;
+      retObj['slides'][numSlides++] = slide;
     });
   }
 
@@ -126,13 +124,13 @@ function getObjectFromMeta(meta, videoFile) {
  */
 function getMetaDataFromDirectory (directory) {
   var parser = new xml2js.Parser();
-  var file = directory + "/metadata.xml";
+  var file = directory + '/metadata.xml';
 
-  var data = "";
+  var data = '';
   var ret = null;
 
   try {
-    data = FS.readFileSync(file, "utf-8");
+    data = FS.readFileSync(file, 'utf-8');
   } catch (ex) {
     // TODO: ignore
   }
@@ -158,21 +156,21 @@ function getMetaDataFromDirectory (directory) {
 function getVideoFromDirectory (directory) {
   var files = FS.readdirSync(directory);
   var video = files.filter(function(d) {
-    return ".mp4" == d.substr(-4);
+    return '.mp4' === d.substr(-4);
   });
 
-  if (1 != video.length) {
-    throw "Found " + video.length + " video files in directory \"" +
-      directory + "\"";
+  if (1 !== video.length) {
+    throw 'Found ' + video.length + ' video files in directory \'' +
+      directory + '\'';
   }
 
   return video[0];
-};
+}
 
 exports.getGUIDFromDirectory = function(directory) {
   var meta = getMetaDataFromDirectory(directory);
   if (! meta ) {
-    return "";
+    return '';
   } else {
     return meta.item_id[0];
   }
@@ -190,7 +188,7 @@ exports.meta = function(directory) {
   dirs.forEach(function(d) {
     var meta = getMetaDataFromDirectory(d);
     // copy the interesting part to an object with key set to itemID
-    ret[ret.length] = getObjectFromMeta(meta, getVideoFromDirectory(d));
+    ret.push(getObjectFromMeta(meta, getVideoFromDirectory(d)));
   });
 
   return ret;
@@ -211,7 +209,7 @@ exports.index = function (directory) {
     var meta = getMetaDataFromDirectory(d);
     var slides = meta.videoTimelineInfo;
 
-    if ("\n\t" == slides) {
+    if ('\n\t' === slides) {
       slides = null;
     }
 
@@ -235,7 +233,7 @@ exports.convert = function (directory, cut) {
     return false;
   }
 
-  var newDir = path.join(directory, "../" +
+  var newDir = path.join(directory, '../' +
                          metadata.item_id[0].toString());
 
   // seems like it's already converted
@@ -255,7 +253,7 @@ exports.convert = function (directory, cut) {
 
   // and write it to file
   var ret = FS.writeFileSync(directory + '/meta.json',
-                             JSON.stringify(metaObject, null, " "));
+                             JSON.stringify(metaObject, null, ' '));
   if (ret) {
     return console.error(ret);
   }

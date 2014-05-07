@@ -1,3 +1,4 @@
+'use strict';
 var expect = require('chai').expect;
 var fluvi = require('..');
 var ncp = require('ncp').ncp;
@@ -20,7 +21,7 @@ describe('fluvi', function() {
 
   it('index should return dirs', function(done) {
     expect(dirs).to.be.an('object');
-    var dummy = expect(dirs).to.be.ok;
+    expect(dirs).to.be.ok;
     done();
   });
 
@@ -36,7 +37,9 @@ describe('fluvi', function() {
     expect(meta).to.be.an('array');
 
     var obj = meta.filter(function(value) {
-      return value.itemID == TEST_ID;
+      var ret = value.itemID.toString() === TEST_ID;
+      //console.log('|' + value.itemID + '|' + TEST_ID + '|'+ret);
+      return ret;
     });
 
     expect(obj.length).to.be.above(0);
@@ -49,7 +52,7 @@ describe('fluvi', function() {
 
 /*  it('slides and numSlides should be equal', function(done) {
     var obj = meta.filter(function(value) {
-      return value.itemID == TEST_ID;
+      return value.itemID === TEST_ID;
     });
 
     expect(obj[0].slides.length).to.be.above(1);
@@ -104,7 +107,7 @@ describe('fluvi', function() {
       renamedDirectory = 'test/tmp/' + guid;
       var converted = fluvi.convert(directory);
       expect(converted).to.be.a('boolean');
-      var foo = expect(converted).to.be.true;
+      expect(converted).to.be.true;
       done();
     });
 
@@ -112,15 +115,15 @@ describe('fluvi', function() {
       // TODO: look for error output
       var converted = fluvi.convert(directory);
       expect(converted).to.be.a('boolean');
-      var foo = expect(converted).to.be.false;
+      expect(converted).to.be.false;
       done();
     });
 
     it('direcory must be renamed', function(done) {
       // check if old dir is removed
-      var foo = expect(FS.existsSync(directory)).to.be.false;
+      expect(FS.existsSync(directory)).to.be.false;
       // ..and new dir exists
-      foo = expect(FS.existsSync(renamedDirectory)).to.be.true;
+      expect(FS.existsSync(renamedDirectory)).to.be.true;
       done();
     });
 
@@ -150,7 +153,7 @@ describe('fluvi', function() {
       renamedDirectory = 'test/tmp/' + guid;
       var converted = fluvi.convert(directory, true);
       expect(converted).to.be.a('boolean');
-      var foo = expect(converted).to.be.true;
+      expect(converted).to.be.true;
       done();
     });
   });

@@ -22,7 +22,7 @@ This will make the command ```fluviconf``` available from the command line.
 ## Usage
 
 ```bash
-$ fluvi -h
+$ fluviconv -h
 
 usage: fluviconv [options] DIRECTORY
 

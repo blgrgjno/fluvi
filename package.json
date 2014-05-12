@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec"
+    "test": "mocha --reporter spec",
+    "jshint": "jshint bin/fluviconv.js index.js"
   },
   "repository": {
     "type": "git",
@@ -17,9 +18,10 @@
     "url": "https://github.com/gorm/fluvi/issues"
   },
   "dependencies": {
-    "xml2js": "^0.4.1",
+    "async": "^0.8.0",
+    "optimist": "^0.6.1",
     "sync": "^0.2.2",
-    "optimist": "^0.6.1"
+    "xml2js": "^0.4.1"
   },
   "devDependencies": {
     "chai": "^1.8.1",

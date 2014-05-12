@@ -160,11 +160,67 @@ function getVideoFromDirectory (directory) {
   });
 
   if (1 !== video.length) {
-    throw 'Found ' + video.length + ' video files in directory \'' +
-      directory + '\'';
+    throw 'Found ' + video.length + ' video files in directory \'' + directory + '\'';
   }
 
   return video[0];
+}
+
+function convertDirectory(directory, options) {
+  var ret;
+
+  util.log('Converting `' + directory + '`');
+
+  var metadata = getMetaDataFromDirectory(directory);
+
+  if (! metadata) {
+    util.debug('already converted, or wrong directory was provided');
+    return false;
+  }
+
+  var newDir = path.join(directory, '../' +
+                         metadata.item_id[0].toString());
+
+  // seems like it's already converted
+  if (FS.existsSync(newDir)) {
+    util.log('ignoring already converted directory: `' + directory+
+              '`');
+    return false;
+  }
+
+  // directory it's there so try to get the JS meta object
+  var metaObject = getObjectFromMeta(metadata,
+                                     getVideoFromDirectory(directory));
+
+  // adjust slide starttime according to video_in (cut file)
+  if (options.cut) {
+    metaObject = cutVideo(metaObject);
+  }
+
+  // and write it to file
+  if (! options.dry) {
+    ret = FS.writeFileSync(directory + '/meta.json',
+                             JSON.stringify(metaObject, null, ' '));
+    if (ret) {
+      console.error(ret);
+      return false;
+    }
+  } else {
+    console.log('would write %d properties to meta.json', Object.keys(metaObject).length);
+  }
+
+  // now it should be ok to rename to its new name
+  if (! options.dry) {
+    ret = FS.renameSync(directory, newDir);
+    if (ret) {
+      console.error(ret);
+      return false;
+    }
+  } else {
+    console.log('would rename `' + directory + '` to `' + newDir + '`');
+  }
+  // success
+  return true;
 }
 
 exports.getGUIDFromDirectory = function(directory) {
@@ -222,49 +278,60 @@ exports.index = function (directory) {
 /**
  * Converts a directory from new to old format.
  * @param {string} directory - The name of the directory to convert
- * @param {boolean} cut - Should assume the video was cutted
+ * @param {options} options - recurse=try to recurse in directory,
+ * dry=test run, delete=delete if missing webPageID
  * @returns A boolean indicating success
  */
-exports.convert = function (directory, cut) {
-  var metadata = getMetaDataFromDirectory(directory);
+exports.convert = function (directory, options) {
+  options = options || {};
+  if (options.recurse) {
+    var files = getDirsFromDirSync(directory);
+    util.log('Found ' + files.length + ' videos that will be converted.');
+    return files.map(function(item) {
+      return convertDirectory(item, options);
+    });
+  } else {
+    return convertDirectory(directory, options);
+  }
+};
 
-  if (! metadata) {
-    util.debug('already converted, or wrong directory was provided');
-    return false;
+/**
+ * Traverse a directory to check for unpublished video files.
+ * @param {string} directory - the name of the directory to look in.
+ * The directory can be either single video directory, or contain a
+ * list of directories with video files.
+ * @returns {array:string} - an array of files to delete
+ */
+exports.getUnpublished = function (directory) {
+  var metaFile = path.join(directory, 'metadata.xml');
+  if (0 !== metaFile.indexOf(directory)) {
+    // ended up somewhere unexpected
+    throw new Error('Unable to find meta.json for ' + directory);
   }
 
-  var newDir = path.join(directory, '../' +
-                         metadata.item_id[0].toString());
+  var isPublished = function(directory) {
+    var meta = getMetaDataFromDirectory(directory);
+    if (Number(meta.web_page_id) > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
-  // seems like it's already converted
-  if (FS.existsSync(newDir)) {
-    util.debug('already converted ' + directory);
-    return false;
+  var unpublished = [];
+  if (FS.existsSync(metaFile)) {
+    if (!isPublished(directory)) {
+      unpublished.push(directory);
+    }
+  } else {
+    // assume recurse
+    var files = getDirsFromDirSync(directory);
+    files.forEach(function(item) {
+      if (!isPublished(item)) {
+        unpublished.push(item);
+      }
+    });
   }
 
-  // directory it's there so try to get the JS meta object
-  var metaObject = getObjectFromMeta(metadata,
-                                     getVideoFromDirectory(directory));
-
-  // adjust slide starttime according to video_in (cut file)
-  if (cut) {
-    metaObject = cutVideo(metaObject);
-  }
-
-  // and write it to file
-  var ret = FS.writeFileSync(directory + '/meta.json',
-                             JSON.stringify(metaObject, null, ' '));
-  if (ret) {
-    return console.error(ret);
-  }
-
-  // now it should be ok to rename to its new name
-  ret = FS.renameSync(directory, newDir);
-
-  if (ret) {
-    return console.error(ret);
-  }
-
-  // success
-  return true;
+  return unpublished;
 };

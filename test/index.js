@@ -136,7 +136,48 @@ describe('fluvi', function() {
     });
   });
 
-  describe('file operations', function() {
+  describe('recurse', function() {
+    before(function(done) {
+      // make root dir
+      FS.mkdirSync('test/tmp');
+      // copy files to tmp folder so that testing is possible
+      ncp('test/media/metadata', 'test/tmp', function (err) {
+        if (err) {
+          return done(err);
+        }
+        return done();
+      });
+    });
+    after(function(done) {
+      tear(done, true);
+    });
+
+    it('should convert with recurse', function(done) {
+      var converted = fluvi.convert('test/tmp', {recurse: true});
+      expect(converted).to.be.a('array'),
+      converted.forEach(function(c) {
+        expect(c).to.be.true;
+      });
+      done();
+    });
+
+    it('files should be converted', function(done) {
+      expect(FS.statSync('test/tmp/909433d3-78a8-465f-aa64-afae6aea1c74').isDirectory()).to.be.true;
+      expect(FS.statSync('test/tmp/909433d3-78a8-465f-aa64-afae6aea1c74/meta.json').isFile()).to.be.true;
+      done();
+    });
+
+    var checkIfDeleted = 'test/tmp/af1a2a58-18ed-4291-8d63-f964032aacd5';
+    it('should report unpublished', function(done) {
+      var toBeDeleted = fluvi.getUnpublished('test/tmp');
+      expect(toBeDeleted).to.be.a('array');
+      expect(toBeDeleted.length).to.equal(1);
+      expect(toBeDeleted[0]).to.equal(checkIfDeleted);
+      done();
+    });
+  });
+
+  describe('cutting', function() {
     // prepare test
     before(setup);
     // cleanup test
@@ -151,10 +192,23 @@ describe('fluvi', function() {
       guid = fluvi.getGUIDFromDirectory(directory);
       // the directory to look for after its renamed
       renamedDirectory = 'test/tmp/' + guid;
-      var converted = fluvi.convert(directory, true);
+
+      var converted = fluvi.convert(directory, {cut: true});
       expect(converted).to.be.a('boolean');
       expect(converted).to.be.true;
       done();
+    });
+
+    it('should have adjusted slide start', function(done) {
+      FS.readFile(path.join(renamedDirectory, 'meta.json'), function(err, data) {
+        if (err) {
+          console.log('error: ' + err);
+        }
+        expect(!err).to.be.ok;
+        data = JSON.parse(data);
+        expect(data.slides[0].startTime).to.deep.equal(['0']);
+        done();
+      });
     });
   });
 });

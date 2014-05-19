@@ -207,6 +207,7 @@ describe('fluvi', function() {
         expect(!err).to.be.ok;
         data = JSON.parse(data);
         expect(data.slides[0].startTime).to.deep.equal(['0']);
+        expect(data.slides[1].startTime[0]).to.equal(0);
         done();
       });
     });

@@ -4,6 +4,7 @@ var FS = require('fs');
 var fluvi = require('fluviconv');
 var path = require('path');
 var pkg = require(path.join(__dirname, '..', 'package.json'));
+var util = require('util');
 
 var argv= require('optimist')
       .usage('Usage: $0 [options] DIRECTORY')
@@ -39,13 +40,13 @@ if (argv.h || argv._.length !== 1) {
 }
 
 if (argv.n) {
-  console.log('Not performing changes. Dry run!');
+  util.log('Not performing changes. Dry run!');
 }
 
 function convertDirectory(directory, options) {
   var ret = fluvi.convert(directory, options);
   if (!ret) {
-    console.log('Unable to convert ' + directory);
+    util.log('Unable to convert ' + directory);
   }
 }
 
@@ -53,6 +54,7 @@ var options = {};
 options.dry = argv.n;
 options.recurse = argv.r;
 options.verbose = argv.v;
+options.cut = argv.c;
 
 function movetoDirectoryNotFound(error) {
   error = error || '';
@@ -75,11 +77,11 @@ function moveDirectories() {
         FS.renameSync(item, newPath);
         numMoved++;
       } else {
-        console.log('Would have moved ' + item + ' to ' + newPath);
+        util.log('Would have moved ' + item + ' to ' + newPath);
       }
     });
     if (numMoved) {
-      console.log('Moved %d files to %s', numMoved, argv.m);
+      util.log('Moved %d files to %s', numMoved, argv.m);
     }
   }
 }
@@ -87,10 +89,11 @@ function moveDirectories() {
 function runMain() {
   if (1 === argv._.length) {
     // check if this is a fluvi directory
-    if (true === FS.statSync(argv._[0]) &&
-        true === FS.statSync(path.join(argv._[0], 'metadata.xml'))) {
+    if ( true == FS.existsSync(argv._[0]) &&
+         true === FS.statSync(argv._[0]).isDirectory() &&
+         true === FS.existsSync(path.join(argv._[0], 'metadata.xml'))) {
       if (options.recurse) {
-        console.log('Directory `' + argv._[0] + '` contains' +
+        util.log('Directory `' + argv._[0] + '` contains' +
                     ' metadata.xml. Ignoring recurse!');
         options.recurse = false;
       }
@@ -99,7 +102,7 @@ function runMain() {
       if (options.recurse) {
         convertDirectory(argv._[0], options);
       } else {
-        console.log(process.title + ': Don\'t know what to do.\nDirectory' +
+        util.log(process.title + ': Don\'t know what to do.\nDirectory' +
                     ' is not a fluvi export and -r (recurse) option missing.');
       }
     }

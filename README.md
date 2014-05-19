@@ -19,7 +19,7 @@ $ sudo npm install --global
 
 This will make the command ```fluviconf``` available from the command line.
 
-## Usage
+## Basic Usage
 
 ```bash
 $ fluviconv -h
@@ -38,6 +38,38 @@ DIRECTORY must be provided
 ```-c``` - this feature will assume that the video files are cutted
 according to the videoIn value from the metadata
 ```-n``` - just for testing
+
+## Typical workflow
+
+A typical workflow to fix files consist of the following:
+
+1. Move out all files that are not published. The fluviconv script
+contains a feeature called -m for this purpose.
+
+```bash
+$ cd /mnt/video   # cd to the directory below export
+$ mkdir unpublished
+$ fluviconv -n -m unpublished exports     # -n = dry run, exports -
+                                          # the exports folder
+                                          # Hope it looks ok!
+$ fluviconv -m unpublished exports
+$ du -sh *                                # to show saved space
+```
+
+2. Now we can run the convertion
+
+```bash
+$ fluviconv -n -c -r exports             # use -n to test. If looks ok:
+$ fluviconv -c -r exports                # time for coffee
+...
+```
+
+3. Must convert swf to png (look below)
+
+4. Then remove all non required thumbs. One possibility is
+```bash
+$ find exports|grep thumbs\/|grep -v mainThumb|xargs rm
+```
 
 ## Source export format
 

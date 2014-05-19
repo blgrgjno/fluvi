@@ -43,19 +43,17 @@ function cutVideo(metaObj) {
   }
 
   // adjust all slide times
-  if (metaObj.videoIn > 0) {
-    metaObj.slides = metaObj.slides.map(function(f) {
+  if (metaObj.videoIn > 0 && metaObj.slides) {
+    metaObj.slides.map(function(f) {
       // dont adjust first slide
       if (f.startTime > 0) {
-        f.startTime[0] -= metaObj.videoIn[0];
+        f.startTime[0] -= metaObj.videoIn[0]
+        f.startTime[0] = f.startTime[0].toString();
       }
-      return f;
     });
-  } else {
-    assert.fail(metaObj.slides.length);
   }
 
-  metaObj.videoIn = [0]; // reset videoIn
+  metaObj.videoIn = ["0"]; // reset videoIn
   return metaObj;
 }
 
@@ -184,7 +182,7 @@ function convertDirectory(directory, options) {
   // seems like it's already converted
   if (FS.existsSync(newDir)) {
     util.log('ignoring already converted directory: `' + directory+
-              '`');
+              '`. Delete or rename `' + newDir + '');
     return false;
   }
 
@@ -195,6 +193,10 @@ function convertDirectory(directory, options) {
   // adjust slide starttime according to video_in (cut file)
   if (options.cut) {
     metaObject = cutVideo(metaObject);
+  }
+
+  if (FS.existsSync(path.join(directory, 'thumbs', 'mainThumb.jpg'))) {
+    metaObject.poster = 'thumbs/mainThumb.jpg';
   }
 
   // and write it to file
@@ -216,8 +218,9 @@ function convertDirectory(directory, options) {
       console.error(ret);
       return false;
     }
+    util.log('Renamed `' + directory + '` to `' + newDir + '`');
   } else {
-    console.log('would rename `' + directory + '` to `' + newDir + '`');
+    util.log('would rename `' + directory + '` to `' + newDir + '`');
   }
   // success
   return true;
